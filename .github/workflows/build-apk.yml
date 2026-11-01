@@ -40,12 +40,19 @@ jobs:
         with:
           gradle-version: "8.14"
 
-      - name: Toolchains (Rust e Android)
+      - name: Toolchain Rust
         run: |
           rustup show
           rustup target add aarch64-linux-android
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "ndk;28.2.13676358" "build-tools;35.0.0" "platforms;android-35"
+
+      - name: Toolchain Android (SDK/NDK)
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          ls "$ANDROID_HOME"
+          if [ ! -x "$SDKM" ]; then SDKM="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)"; fi
+          echo "sdkmanager: $SDKM"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "ndk;28.2.13676358" "build-tools;35.0.0" "platforms;android-35"
 
       - name: Preparar tabelas do motor (baixa os arquivos oficiais da Mojang)
         run: python3 tools/android_prepare.py
